@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+  <title>Trading Journal</title>
+  <style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: sans-serif; background: #0a0e0f; color: #e6edf3; padding-bottom: 80px; }
+.page { display: none; padding: 15px; max-width: 500px; margin: 0 auto; }
+.page.active { display: block; }
+.tabs { display: flex; background: #161b22; border-radius: 25px; padding: 4px; margin-bottom: 15px; }
+.tab { flex: 1; padding: 9px; border: none; border-radius: 25px; background: transparent; color: #8b949e; cursor: pointer; }
+.tab.active { background: #238636; color: white; }
+.card { background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 15px; margin: 15px; }
+.sub { color: #8b949e; font-size: 13px; }
+input, button, select { padding: 11px; margin: 5px 0; border-radius: 8px; border: 1px solid #30363d; background: #21262d; color: #e6edf3; width: 100%; }
+button { background: #238636; color: white; cursor: pointer; border: none; font-weight: bold; }
+button.plain { background: #21262d; }
+button.danger { background: #b62324; }
+button.blue { background: #1f6feb; }
+.full { width: 100%; }
+
+/* day group cards */
+.day { background: #161b22; border: 1px solid #30363d; border-left: 4px solid #238636; border-radius: 12px; padding: 12px; margin: 10px 0; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+.day.loss { border-left-color: #f85149; }
+.day .d { font-weight: bold; }
+.day .dow { color: #8b949e; font-size: 12px; }
+.day .p { font-weight: bold; text-align: right; }
+.day .n { color: #8b949e; font-size: 12px; text-align: right; }
+.profit { color: #3fb950; } .loss2 { color: #f85149; }
+.trade-row { display: flex; justify-content: space-between; padding: 8px 12px; background: #0d1117; border-radius: 8px; margin: 6px 0; font-size: 14px; }
+.day-detail { display: none; }
+
+/* stats */
+.stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 15px; }
+.stat { background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 14px; text-align: center; }
+.stat .num { font-size: 22px; font-weight: bold; }
+.stat .lbl { color: #8b949e; font-size: 12px; }
+
+/* fab + nav */
+#fab { position: fixed; right: 20px; bottom: 90px; width: 58px; height: 58px; border-radius: 50%; font-size: 30px; box-shadow: 0 4px 12px rgba(0,0,0,.6); z-index: 20; }
+.bottomnav { position: fixed; bottom: 0; left: 0; right: 0; background: #161b22; border-top: 1px solid #30363d; display: flex; justify-content: space-around; padding: 8px 0 14px; }
+.bottomnav button { background: none; color: #8b949e; font-size: 11px; width: auto; }
+.bottomnav button span { display: block; font-size: 20px; }
+.bottomnav .active { color: #3fb950; }
+
+/* popup form */
+.overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 30; }
+.overlay.open { display: flex; align-items: flex-end; justify-content: center; }
+.sheet { background: #161b22; border-radius: 16px 16px 0 0; padding: 20px; width: 100%; max-width: 500px; }
+</style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <!-- HOME TAB -->
+  <div id="page-home" class="page active">
+    <div class="tabs">
+      <button class="tab active" onclick="setMarket('Forex', this)">Forex</button>
+      <button class="tab" onclick="setMarket('Stock/F&O', this)">Stock/F&O</button>
+      <button class="tab" onclick="setMarket('Crypto', this)">Crypto</button>
+    </div>
+    <div id="dayList"></div>
+  </div>
+
+  <!-- DASHBOARD TAB -->
+  <div id="page-dashboard" class="page">
+    <div class="stats-grid" id="stats"></div>
+    <div class="card"><canvas id="chart" height="220"></canvas></div>
+    <div class="card"><canvas id="stockChart" height="220"></canvas></div>
+  </div>
+
+  <!-- SETTINGS TAB -->
+  <div id="page-settings" class="page">
+    <div class="card">
+      <h3>Data</h3>
+      <button class="blue full" onclick="downloadCSV()">Download CSV</button>
+      <button class="danger full" onclick="wipeAll()">Delete all trades</button>
+    </div>
+    <div class="card"><p class="sub">Made with HTML, CSS &amp; JS. Data aapke phone me hi save hota hai.</p></div>
+  </div>
+
+  <!-- ADD TRADE FORM (popup) -->
+  <div id="formOverlay" class="overlay">
+    <div class="sheet">
+      <h3 id="formTitle">New Trade</h3>
+      <input type="date" id="date">
+      <input type="text" id="stock" placeholder="Stock / Pair">
+      <input type="number" id="qty" placeholder="Quantity">
+      <input type="number" id="buy" placeholder="Buy price" step="0.01">
+      <input type="number" id="sell" placeholder="Sell price" step="0.01">
+      <button class="full" onclick="addTrade()" id="saveBtn">Save</button>
+      <button class="full plain" onclick="closeForm()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- + button -->
+  <button id="fab" onclick="openForm()">+</button>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottomnav">
+    <button onclick="go('home', this)"><span>&#127968;</span>Home</button>
+    <button onclick="go('dashboard', this)"><span>&#128202;</span>Stats</button>
+    <div class="spacer"></div>
+    <button onclick="go('settings', this)"><span>&#9881;</span>Settings</button>
+  </div>
+
+<script src="script.js"></script>
+<script>
+let trades = JSON.parse(localStorage.getItem('trades')) || [];
+trades = trades.filter(t => t && t.date);
+let market = 'Forex', chart = null, stockChart = null, editIndex = null;
+const $ = id => document.getElementById(id);
+const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+function save() { localStorage.setItem('trades', JSON.stringify(trades)); }
+
+function openForm() { $('formOverlay').classList.add('open'); }
+function closeForm() {
+  $('formOverlay').classList.remove('open');
+  ['date','stock','qty','buy','sell'].forEach(i => $(i).value = '');
+  editIndex = null;
+  $('formTitle').innerText = 'New Trade';
+  $('saveBtn').innerText = 'Save';
+}
+
+function addTrade() {
+  const date = $('date').value, stock = $('stock').value.trim();
+  const qty = Number($('qty').value), buy = Number($('buy').value), sell = Number($('sell').value);
+  if (!date || !stock || !qty || !buy || !sell) { alert('saare box bharo'); return; }
+  const t = { date, stock, qty, buy, sell, profit: (sell - buy) * qty, market };
+  if (editIndex === null) trades.push(t);
+  else { trades[editIndex] = t; }
+  save();
+  closeForm();
+  render();
+}
+
+function deleteTrade(i) {
+  if (!confirm('delete?')) return;
+  trades.splice(i, 1);
+  save();
+  render();
+}
+
+function setMarket(m, btn) {
+  market = m;
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+function go(page, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  $('page-' + page).classList.add('active');
+  document.querySelectorAll('.bottomnav button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (page === 'dashboard') drawCharts();
+}
+
+function toggleDetail(el) { el.querySelector('.day-detail').style.display = el.querySelector('.day-detail').style.display === 'block' ? 'none' : 'block'; }
+
+function render() {
+  const list = $('dayList');
+  list.innerHTML = '';
+  // sirf is market ke trades
+  const visible = trades.map((t, i) => ({ t, i })).filter(({ t }) => t.market === market);
+
+  // date ke hisaab se group karo
+  const groups = {};
+  visible.forEach(({ t, i }) => {
+    if (!groups[t.date]) groups[t.date] = [];
+    groups[t.date].push({ t, i });
+  });
+
+  Object.keys(groups).sort().reverse().forEach(date => {
+    const dayTrades = groups[date];
+    const dayTotal = dayTrades.reduce((s, { t }) => s + t.profit, 0);
+    const d = new Date(date);
+
+    const box = document.createElement('div');
+    box.className = 'day' + (dayTotal < 0 ? ' loss' : '');
+    box.innerHTML =
+      '<div class="d">' + date.split('-').reverse().join('-') + '<div class="dow">' + DAYS[d.getDay()] + '</div></div>' +
+      '<div class="p ' + (dayTotal >= 0 ? 'profit' : 'loss2') + '">' + (dayTotal >= 0 ? '$' : '$-') + Math.abs(dayTotal).toFixed(2) +
+      '<div class="n">' + dayTrades.length + ' Trades</div></div>';
+
+    // click karo toh us din ke trades dikhenge
+    const detail = document.createElement('div');
+    detail.className = 'day-detail';
+    dayTrades.forEach(({ t, i }) => {
+      const row = document.createElement('div');
+      row.className = 'trade-row';
+      row.innerHTML = '<span>' + t.stock + ' x' + t.qty + ' <button style="width:auto;padding:3px 8px;background:#b62324" onclick="event.stopPropagation();deleteTrade(' + i + ')">X</button></span>' +
+        '<span class="' + (t.profit >= 0 ? 'profit' : 'loss2') + '">' + t.profit.toFixed(2) + '</span>';
+      detail.appendChild(row);
+    });
+    detail.style.display = 'none';
+    box.appendChild(detail);
+    box.onclick = () => toggleDetail(box);
+    list.appendChild(box);
+  });
+
+  // stats
+  let total = 0, wins = 0;
+  trades.forEach(t => { total += t.profit; if (t.profit >= 0) wins++; });
+  const winRate = trades.length ? Math.round(wins / trades.length * 100) : 0;
+  $('stats').innerHTML =
+    '<div class="stat"><div class="num">' + trades.length + '</div><div class="lbl">Trades</div></div>' +
+    '<div class="stat"><div class="num ' + (total >= 0 ? 'profit' : 'loss2') + '">' + total.toFixed(0) + '</div><div class="lbl">Total P/L</div></div>' +
+    '<div class="stat"><div class="num">' + winRate + '%</div><div class="lbl">Win rate</div></div>' +
+    '<div class="stat"><div class="num profit">' + (trades.length ? Math.max(...trades.map(t => t.profit)).toFixed(0) : '-') + '</div><div class="lbl">Best trade</div></div>';
+}
+
+function drawCharts() {
+  const monthly = {};
+  for (const t of trades) { const m = t.date.slice(0, 7); monthly[m] = (monthly[m] || 0) + t.profit; }
+  const labels = Object.keys(monthly).sort();
+  const values = labels.map(m => monthly[m]);
+
+  if (chart) chart.destroy();
+  chart = new Chart($('chart'), {
+    type: 'bar',
+    data: { labels, datasets: [{ label: 'P/L', data: values, maxBarThickness: 50,
+      backgroundColor: values.map(v => v >= 0 ? '#3fb950' : '#f85149') }] },
+    options: { maintainAspectRatio: false, plugins: { legend: { display: false } },
+      scales: { x: { ticks: { color: '#e6edf3' } }, y: { ticks: { color: '#e6edf3' } } } }
+  });
+
+  const byStock = {};
+  for (const t of trades) byStock[t.stock] = (byStock[t.stock] || 0) + t.profit;
+  const sL = Object.keys(byStock), sV = sL.map(s => byStock[s]);
+
+  if (stockChart) stockChart.destroy();
+  stockChart = new Chart($('stockChart'), {
+    type: 'bar',
+    data: { labels: sL, datasets: [{ label: 'P/L', data: sV, maxBarThickness: 50,
+      backgroundColor: sV.map(v => v >= 0 ? '#3fb950' : '#f85149') }] },
+    options: { indexAxis: 'y', maintainAspectRatio: false, plugins: { legend: { display: false } },
+      scales: { x: { ticks: { color: '#e6edf3' } }, y: { ticks: { color: '#e6edf3' } } } }
+  });
+}
+
+function downloadCSV() {
+  let csv = 'Date,Stock,Qty,Buy,Sell,Profit,Market\n';
+  for (const t of trades) csv += [t.date, t.stock, t.qty, t.buy, t.sell, t.profit, t.market].join(',') + '\n';
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = 'trades.csv';
+  link.click();
+}
+
+function wipeAll() {
+  if (!confirm('sab trades delete? wapas nahi aayenge')) return;
+  trades = [];
+  save();
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
