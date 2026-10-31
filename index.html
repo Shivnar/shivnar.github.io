@@ -109,7 +109,12 @@ function restoreData(input) {
     <div id="dayList"></div>
   </div>
 
-  <!-- DASHBOARD TAB -->
+    <!-- JOURNAL TAB (all trades) -->
+  <div id="page-journal" class="page">
+    <div id="journalList"></div>
+  </div>
+
+<!-- DASHBOARD TAB -->
   <div id="page-dashboard" class="page">
     <div class="stats-grid" id="stats"></div>
     <div class="card"><canvas id="chart" height="220"></canvas></div>
@@ -149,8 +154,8 @@ function restoreData(input) {
   <!-- BOTTOM NAV -->
   <div class="bottomnav">
     <button onclick="go('home', this)"><span>&#127968;</span>Home</button>
-    <button onclick="go('dashboard', this)"><span>&#128202;</span>Stats</button>
-    <div class="spacer"></div>
+    <button onclick="go('journal', this)"><span>&#128209;</span>Journal</button>
+    <button onclick="go('dashboard', this)"><span>&#128202;</span>Analyse</button>
     <button onclick="go('settings', this)"><span>&#9881;</span>Settings</button>
   </div>
 
@@ -228,9 +233,30 @@ function go(page, btn) {
   document.querySelectorAll('.bottomnav button').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   if (page === 'dashboard') drawCharts();
+  if (page === 'journal') renderJournal();
 }
 
 function toggleDetail(el) { el.querySelector('.day-detail').style.display = el.querySelector('.day-detail').style.display === 'block' ? 'none' : 'block'; }
+
+function renderJournal() {
+  const list = $('journalList');
+  list.innerHTML = '';
+  const visible = trades.map((t, i) => ({ t, i })).filter(({ t }) => t.market === market).reverse();
+  if (!visible.length) {
+    list.innerHTML = '<div class="card sub">Koi trade nahi. + button se add karo</div>';
+    return;
+  }
+  visible.forEach(({ t, i }) => {
+    const row = document.createElement('div');
+    row.className = 'trade-row';
+    row.innerHTML =
+      '<div>' + t.stock + ' <span style="color:#8b949e">x' + t.qty + '</span><div class="dow">' + t.date + '</div></div>' +
+      '<div style="display:flex;align-items:center;gap:10px">' +
+      '<b class="' + (t.profit >= 0 ? 'profit' : 'loss2') + '">' + (t.profit >= 0 ? '$' : '$-') + Math.abs(t.profit).toFixed(2) + '</b>' +
+      '<span class="del" onclick="deleteTrade(' + i + ')" style="color:#f85149;font-weight:700;cursor:pointer">X</span></div>';
+    list.appendChild(row);
+  });
+}
 
 function render() {
   const list = $('dayList');
