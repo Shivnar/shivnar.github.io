@@ -100,32 +100,6 @@ function restoreData(input) {
   };
   reader.readAsText(file);
 }
-function savePin() {
-  const v = document.getElementById('pinInput').value.trim();
-  const setMode = !localStorage.getItem('pin');
-  if (!/^\d{4}$/.test(v)) { alert('4 digit number dalo (jaise 1234)'); return; }
-  if (setMode) { localStorage.setItem('pin', v); unlockApp(); return; }
-  if (v === localStorage.getItem('pin')) unlockApp();
-  else { alert('galat PIN'); document.getElementById('pinInput').value = ''; }
-}
-function unlockApp() {
-  document.getElementById('lockScreen').style.display = 'none';
-  document.getElementById('fab').style.display = '';
-  document.querySelector('.bottomnav').style.display = '';
-}
-function initLock() {
-  const hasPin = !!localStorage.getItem('pin');
-  const lock = document.getElementById('lockScreen');
-  document.getElementById('fab').style.display = 'none';
-  document.querySelector('.bottomnav').style.display = 'none';
-  lock.style.display = 'flex';
-  if (hasPin) {
-    document.getElementById('lockTitle').innerText = 'PIN dalo';
-    document.getElementById('pinBtn').innerText = 'Unlock';
-    document.getElementById('pinHint').innerText = '';
-  }
-}
-</script>
 </head>
 <body>
 
@@ -421,6 +395,31 @@ function restoreData(input) {
   reader.readAsText(file);
 }
 initLock();
+function savePin() {
+  const v = document.getElementById('pinInput').value.trim();
+  const setMode = !localStorage.getItem('pin');
+  if (!/^\d{4}$/.test(v)) { alert('4 digit number dalo (jaise 1234)'); return; }
+  if (setMode) { localStorage.setItem('pin', v); unlockApp(); return; }
+  if (v === localStorage.getItem('pin')) unlockApp();
+  else { alert('galat PIN'); document.getElementById('pinInput').value = ''; }
+}
+function unlockApp() {
+  document.getElementById('lockScreen').style.display = 'none';
+  document.getElementById('fab').style.display = '';
+  document.querySelector('.bottomnav').style.display = '';
+}
+function initLock() {
+  const hasPin = !!localStorage.getItem('pin');
+  const lock = document.getElementById('lockScreen');
+  document.getElementById('fab').style.display = 'none';
+  document.querySelector('.bottomnav').style.display = 'none';
+  lock.style.display = 'flex';
+  if (hasPin) {
+    document.getElementById('lockTitle').innerText = 'PIN dalo';
+    document.getElementById('pinBtn').innerText = 'Unlock';
+    document.getElementById('pinHint').innerText = '';
+  }
+}
 </script>
 <div style="text-align:center;padding:16px;color:#888;font-size:12px">made by Satya</div>
 </body>
