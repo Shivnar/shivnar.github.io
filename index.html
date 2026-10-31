@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-  <title>Trading Journal</title>
+  <title>Satya's Trading Journal</title>
   <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: sans-serif; background: #0a0e0f; color: #e6edf3; padding-bottom: 80px; }
@@ -50,7 +50,30 @@ button.blue { background: #1f6feb; }
 .overlay.open { display: flex; align-items: flex-end; justify-content: center; }
 .sheet { background: #161b22; border-radius: 16px 16px 0 0; padding: 20px; width: 100%; max-width: 500px; }
 </style>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js">
+function backupData() {
+  const blob = new Blob([JSON.stringify(trades)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'journal-backup.json';
+  a.click();
+}
+function restoreData(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(reader.result);
+      if (!Array.isArray(data)) throw 0;
+      trades = data.filter(t => t && t.date);
+      save(); render();
+      alert('backup restore ho gaya');
+    } catch(e) { alert('ye backup file nahi hai'); }
+  };
+  reader.readAsText(file);
+}
+</script>
 </head>
 <body>
 
@@ -76,6 +99,9 @@ button.blue { background: #1f6feb; }
     <div class="card">
       <h3>Data</h3>
       <button class="blue full" onclick="downloadCSV()">Download CSV</button>
+      <button class="blue full" onclick="backupData()">Backup (file save karo)</button>
+      <button class="blue full" onclick="document.getElementById('restoreFile').click()">Restore backup</button>
+      <input type="file" id="restoreFile" accept=".json" style="display:none" onchange="restoreData(this)">
       <button class="danger full" onclick="wipeAll()">Delete all trades</button>
     </div>
     <div class="card"><p class="sub">Made with HTML, CSS &amp; JS. Data aapke phone me hi save hota hai.</p></div>
@@ -106,7 +132,30 @@ button.blue { background: #1f6feb; }
     <button onclick="go('settings', this)"><span>&#9881;</span>Settings</button>
   </div>
 
-<script src="script.js"></script>
+<script src="script.js">
+function backupData() {
+  const blob = new Blob([JSON.stringify(trades)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'journal-backup.json';
+  a.click();
+}
+function restoreData(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(reader.result);
+      if (!Array.isArray(data)) throw 0;
+      trades = data.filter(t => t && t.date);
+      save(); render();
+      alert('backup restore ho gaya');
+    } catch(e) { alert('ye backup file nahi hai'); }
+  };
+  reader.readAsText(file);
+}
+</script>
 <script>
 let trades = JSON.parse(localStorage.getItem('trades')) || [];
 trades = trades.filter(t => t && t.date);
@@ -260,6 +309,30 @@ function wipeAll() {
 }
 
 render();
+
+function backupData() {
+  const blob = new Blob([JSON.stringify(trades)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'journal-backup.json';
+  a.click();
+}
+function restoreData(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(reader.result);
+      if (!Array.isArray(data)) throw 0;
+      trades = data.filter(t => t && t.date);
+      save(); render();
+      alert('backup restore ho gaya');
+    } catch(e) { alert('ye backup file nahi hai'); }
+  };
+  reader.readAsText(file);
+}
 </script>
+<div style="text-align:center;padding:16px;color:#888;font-size:12px">made by Satya</div>
 </body>
 </html>
