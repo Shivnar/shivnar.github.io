@@ -8,7 +8,7 @@
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 body {
   font-family: 'Segoe UI', system-ui, sans-serif;
-  background: radial-gradient(1200px 600px at 50% -10%, #12351d 0%, #0a0e0f 55%) no-repeat, #0a0e0f;
+  background: radial-gradient(700px 470px at 50% -8%, rgba(28,73,82,.24), transparent 70%), linear-gradient(180deg, #0b121a, #0a1017 70%, #0a1016) fixed;
   background-attachment: fixed;
   color: #e6edf3;
   padding-bottom: 90px;
@@ -61,7 +61,7 @@ button.blue { background: linear-gradient(135deg, #388bfd, #1f6feb); }
 .stat .lbl { color: #8b949e; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
 
 /* fab + nav */
-#fab { position: fixed; right: 20px; bottom: 96px; width: 60px; height: 60px; border-radius: 50%; font-size: 30px; box-shadow: 0 6px 20px rgba(46,160,67,.45); z-index: 20; }
+#fab { position: fixed; right: 20px; bottom: 96px; width: 60px; height: 60px; border-radius: 50%; font-size: 30px; background: linear-gradient(135deg, #0f766e, #115e59); box-shadow: 0 6px 20px rgba(15,118,110,.45); z-index: 20; }
 .bottomnav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(22,27,34,.92); backdrop-filter: blur(12px); border-top: 1px solid #30363d; display: flex; justify-content: space-around; padding: 8px 0 14px; }
 .bottomnav button { background: none; color: #8b949e; font-size: 11px; width: auto; transition: color .2s; }
 .bottomnav button span { display: block; font-size: 20px; }
@@ -104,6 +104,50 @@ button.blue { background: linear-gradient(135deg, #388bfd, #1f6feb); }
 .photo-empty { padding:16px; text-align:center; background:#0d1117; color:#8b949e; border:1px dashed #30363d; border-radius:10px; font-size:13px; }
 #saveBtn { margin-top:18px; }
 
+/* profile tab: polished navy surfaces with a restrained teal signature */
+#page-profile { width: min(100%, 540px); padding: 18px 20px 32px; color: #e7eef6; }
+#page-profile .profile-head { position: relative; display: flex; align-items: center; gap: 16px; padding: 21px 18px; margin: 0 0 27px; overflow: hidden; text-align: left; background: radial-gradient(ellipse at 100% 0%, rgba(63,181,165,.17), transparent 52%), linear-gradient(145deg, rgba(27,44,59,.98), rgba(17,28,40,.98)); border: 1px solid rgba(107,145,161,.23); border-radius: 22px; box-shadow: 0 14px 34px rgba(0,0,0,.28), inset 0 1px rgba(255,255,255,.035); }
+#page-profile .profile-head::after { content: ""; position: absolute; width: 116px; height: 116px; right: -40px; bottom: -76px; border: 1px solid rgba(85,199,178,.18); border-radius: 50%; box-shadow: 0 0 0 14px rgba(85,199,178,.035), 0 0 0 29px rgba(85,199,178,.025); pointer-events: none; }
+#page-profile .profile-avatar { display: grid; place-items: center; flex: 0 0 62px; width: 62px; height: 62px; color: #8ce4d2; background: linear-gradient(145deg, rgba(85,199,178,.2), rgba(85,199,178,.07)); border: 1px solid rgba(113,224,202,.42); border-radius: 19px; box-shadow: inset 0 1px rgba(255,255,255,.08), 0 7px 18px rgba(0,0,0,.17); }
+#page-profile .profile-avatar svg { width: 29px; height: 29px; }
+#page-profile .profile-identity { min-width: 0; }
+#page-profile .profile-title { color: #83d9ca; font-size: 10px; line-height: 1.2; font-weight: 800; letter-spacing: 1.8px; text-transform: uppercase; margin: 0 0 7px; }
+#page-profile .profile-name { color: #f5f8fb; font-size: clamp(19px, 5vw, 23px); line-height: 1.2; font-weight: 720; letter-spacing: -.45px; }
+#page-profile .profile-email { color: #a6b6c5; font-size: 12px; line-height: 1.45; margin-top: 5px; overflow-wrap: anywhere; }
+#page-profile .profile-section { display: flex; align-items: center; gap: 9px; margin: 0 3px 11px; color: #b6c5d1; font-size: 10px; font-weight: 800; letter-spacing: 1.55px; text-transform: uppercase; }
+#page-profile .profile-section::before { content: ""; width: 3px; height: 13px; border-radius: 4px; background: linear-gradient(180deg, #75dfca, #318f8b); box-shadow: 0 0 10px rgba(85,199,178,.4); }
+#page-profile .profile-card { margin: 0 0 24px; padding: 5px 15px; overflow: hidden; background: linear-gradient(155deg, rgba(25,39,52,.97), rgba(16,27,39,.98)); border: 1px solid rgba(107,145,161,.2); border-radius: 17px; box-shadow: 0 10px 26px rgba(0,0,0,.24), inset 0 1px rgba(255,255,255,.035); }
+#page-profile .profile-action { position: relative; display: flex; align-items: center; gap: 13px; width: 100%; min-height: 62px; padding: 10px 3px; margin: 0; background: transparent; border: 0; border-bottom: 1px solid rgba(148,163,184,.13); border-radius: 0; text-align: left; color: #e5edf4; transition: background .2s ease, transform .16s ease; }
+#page-profile .profile-action:last-child { border-bottom: 0; }
+#page-profile .profile-action:hover { background: linear-gradient(90deg, rgba(85,199,178,.075), transparent 90%); }
+#page-profile .profile-action:active { transform: scale(.99); }
+#page-profile .profile-action:focus-visible { outline: 2px solid #55c7b2; outline-offset: -2px; border-radius: 8px; }
+#page-profile .profile-icon { display: grid; place-items: center; flex: 0 0 36px; width: 36px; height: 36px; color: #74d8c5; background: linear-gradient(145deg, rgba(85,199,178,.14), rgba(85,199,178,.055)); border: 1px solid rgba(85,199,178,.12); border-radius: 12px; }
+#page-profile .profile-icon svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+#page-profile .profile-copy { flex: 1; min-width: 0; }
+#page-profile .profile-copy strong { display: block; font-size: 13px; line-height: 1.3; font-weight: 650; letter-spacing: .05px; }
+#page-profile .profile-copy small { display: block; margin-top: 3px; color: #8fa1b1; font-size: 11px; line-height: 1.4; font-weight: 400; }
+#page-profile .profile-chevron { display: grid; place-items: center; flex: 0 0 24px; width: 24px; height: 24px; color: #7890a1; font-size: 21px; font-weight: 300; transition: color .2s, transform .2s; }
+#page-profile .profile-action:hover .profile-chevron { color: #82decd; transform: translateX(2px); }
+#page-profile .profile-action.signout { color: #ffaaa8; }
+#page-profile .profile-action.signout .profile-icon { color: #ff8f8c; background: rgba(248,81,73,.09); border-color: rgba(248,81,73,.14); }
+#page-profile .profile-action.signout .profile-copy small { color: #a88f94; }
+body.profile-view { background: radial-gradient(700px 470px at 50% -8%, rgba(28,73,82,.34), transparent 70%), linear-gradient(180deg, #0b121a, #0a1017 70%, #0a1016) fixed; color: #e6edf3; }
+body.profile-view .bottomnav { background: rgba(12,20,29,.94); border-top-color: rgba(107,145,161,.19); box-shadow: 0 -8px 24px rgba(0,0,0,.2); }
+body.profile-view .bottomnav button { color: #91a3b2; }
+body.profile-view .bottomnav .active { color: #6ed5c2; }
+@media (max-width: 380px) {
+  #page-profile { padding: 13px 14px 27px; }
+  #page-profile .profile-head { gap: 12px; padding: 17px 14px; margin-bottom: 23px; border-radius: 19px; }
+  #page-profile .profile-avatar { flex-basis: 54px; width: 54px; height: 54px; border-radius: 16px; }
+  #page-profile .profile-card { padding: 4px 11px; margin-bottom: 20px; }
+  #page-profile .profile-action { gap: 10px; min-height: 59px; }
+  #page-profile .profile-copy strong { font-size: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #page-profile *, #page-profile *::before, #page-profile *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+.settings-back { margin: 4px 0 14px; }
 /* pin lock */
 .lockscreen { position: fixed; inset: 0; background: rgba(10,14,15,.98); z-index: 100; display: flex; align-items: center; justify-content: center; }
 .lockbox { width: 88%; max-width: 340px; text-align: center; }
@@ -139,8 +183,54 @@ button.blue { background: linear-gradient(135deg, #388bfd, #1f6feb); }
     <div class="card"><canvas id="stockChart" height="220"></canvas></div>
   </div>
 
+  <!-- PROFILE TAB -->
+  <div id="page-profile" class="page">
+    <div class="profile-head">
+      <div class="profile-avatar" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"></circle><path d="M5.5 20a6.5 6.5 0 0 1 13 0"></path></svg></div>
+      <div class="profile-identity">
+        <h1 class="profile-title">Your profile</h1>
+        <div class="profile-name">Satya Nigam roy</div>
+        <p class="profile-email" id="profileEmail">Trading journal account</p>
+      </div>
+    </div>
+
+    <div class="profile-section">Manage</div>
+    <div class="card profile-card">
+      <button class="profile-action" onclick="showStrategies()">
+        <span class="profile-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 19h16M6 16V9m6 7V5m6 11v-4"></path><circle cx="6" cy="7" r="1.5"></circle><circle cx="12" cy="3.5" r="1.5"></circle><circle cx="18" cy="10" r="1.5"></circle></svg></span><span class="profile-copy"><strong>Strategy</strong><small>Your trading setups</small></span><span class="profile-chevron" aria-hidden="true">›</span>
+      </button>
+      <button class="profile-action" onclick="downloadCSV()">
+        <span class="profile-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5"></path><path d="M5 16v4h14v-4"></path></svg></span><span class="profile-copy"><strong>Download Reports</strong><small>Export your journal data</small></span><span class="profile-chevron" aria-hidden="true">›</span>
+      </button>
+      <button class="profile-action" onclick="goSettings()">
+        <span class="profile-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="m19.4 15 .1.1 1.4 1.1-1.5 2.5-1.7-1v-2.4l1.7-1-1.5-2.5-1.9.5a7 7 0 0 0-2.1-1.2L13.5 3h-3l-.4 2.1A7 7 0 0 0 8 6.3l-1.9-.5-1.5 2.5 1.7 1v2.4l-1.7 1 1.5 2.5 1.9-.5a7 7 0 0 0 2.1 1.2l.4 2.1h3l.4-2.1a7 7 0 0 0 1.5-.9"></path></svg></span><span class="profile-copy"><strong>Settings</strong><small>Data and app preferences</small></span><span class="profile-chevron" aria-hidden="true">›</span>
+      </button>
+    </div>
+
+    <div class="profile-section">Support</div>
+    <div class="card profile-card">
+      <button class="profile-action" onclick="requestFeature()">
+        <span class="profile-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 18h6m-5 3h4m-5-6a6 6 0 1 1 6 0c-.8.6-1 1.2-1 2h-4c0-.8-.2-1.4-1-2Z"></path><path d="M12 2v1"></path></svg></span><span class="profile-copy"><strong>Request New Feature</strong><small>Share an idea for the journal</small></span><span class="profile-chevron" aria-hidden="true">›</span>
+      </button>
+      <button class="profile-action" onclick="shareApp()">
+        <span class="profile-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 5h5v5"></path><path d="m19 5-9 9"></path><path d="M18 13v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"></path></svg></span><span class="profile-copy"><strong>Share App</strong><small>Send the journal to someone</small></span><span class="profile-chevron" aria-hidden="true">›</span>
+      </button>
+      <button class="profile-action" onclick="reportBug()">
+        <span class="profile-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 8v5m0 3h.01"></path><path d="M10.3 3.8 2.9 17a2 2 0 0 0 1.7 3h14.8a2 2 0 0 0 1.7-3L13.7 3.8a2 2 0 0 0-3.4 0Z"></path></svg></span><span class="profile-copy"><strong>Bug Report</strong><small>Tell us if something feels off</small></span><span class="profile-chevron" aria-hidden="true">›</span>
+      </button>
+    </div>
+
+    <div class="profile-section">Account</div>
+    <div class="card profile-card">
+      <button class="profile-action signout" onclick="doLogout()">
+        <span class="profile-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10 17l5-5-5-5"></path><path d="M15 12H4"></path><path d="M20 4v16"></path></svg></span><span class="profile-copy"><strong>Sign Out</strong><small>Sign out from this account</small></span><span class="profile-chevron" aria-hidden="true">›</span>
+      </button>
+    </div>
+  </div>
+
   <!-- SETTINGS TAB -->
   <div id="page-settings" class="page">
+    <button class="plain settings-back" onclick="go('profile', document.querySelector('.bottomnav button[data-page=profile]'))">‹ Back to Profile</button>
     <div class="card">
       <h3>Data</h3>
       <button class="blue full" onclick="downloadCSV()">Download CSV</button>
@@ -149,7 +239,6 @@ button.blue { background: linear-gradient(135deg, #388bfd, #1f6feb); }
       <button class="blue full" onclick="document.getElementById('restoreFile').click()">Restore backup</button>
       <input type="file" id="restoreFile" accept=".json" style="display:none" onchange="restoreData(this)">
       <button class="danger full" onclick="wipeAll()">Delete all trades</button>
-      <button class="full" style="background:#b62324;margin-top:8px" onclick="doLogout()">Log out</button>
     </div>
     <div class="card"><p class="sub">Made with HTML, CSS &amp; JS. Data aapke phone me hi save hota hai.</p></div>
   </div>
@@ -227,10 +316,10 @@ button.blue { background: linear-gradient(135deg, #388bfd, #1f6feb); }
 
   <!-- BOTTOM NAV -->
   <div class="bottomnav">
-    <button onclick="go('home', this)"><span>&#127968;</span>Home</button>
-    <button onclick="go('journal', this)"><span>&#128209;</span>Journal</button>
-    <button onclick="go('dashboard', this)"><span>&#128202;</span>Analyse</button>
-    <button onclick="go('settings', this)"><span>&#9881;</span>Settings</button>
+    <button data-page="home" onclick="go('home', this)"><span>&#127968;</span>Home</button>
+    <button data-page="journal" onclick="go('journal', this)"><span>&#128209;</span>Journal</button>
+    <button data-page="dashboard" onclick="go('dashboard', this)"><span>&#128202;</span>Analyse</button>
+    <button data-page="profile" onclick="go('profile', this)"><span>&#128100;</span>Profile</button>
   </div>
 
 <script>
@@ -444,13 +533,52 @@ function setMarket(m, btn) {
   render();
 }
 
+function goSettings() {
+  go('settings', document.querySelector('.bottomnav button[data-page="profile"]'));
+}
+function showStrategies() {
+  const counts = {};
+  trades.forEach(t => { if (t.strategy) counts[t.strategy] = (counts[t.strategy] || 0) + 1; });
+  const names = Object.keys(counts).sort();
+  alert(names.length ? 'Strategies in your journal:\n' + names.map(name => name + ': ' + counts[name] + (counts[name] === 1 ? ' trade' : ' trades')).join('\n') : 'Abhi journal me koi strategy-tagged trade nahi hai');
+}
+function showAppInfo() {
+  alert('Trading Journal\nTrades browser storage me save hote hain aur signed-in account ke saath cloud sync hota hai. CSV export aur JSON backup/restore Settings me available hain.');
+}
 function go(page, btn) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   $('page-' + page).classList.add('active');
+  document.body.classList.toggle('profile-view', page === 'profile');
   document.querySelectorAll('.bottomnav button').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
+  if (btn) btn.classList.add('active');
   if (page === 'dashboard') drawCharts();
   if (page === 'journal') renderJournal();
+}
+
+async function shareText(title, text) {
+  try {
+    if (navigator.share) {
+      await navigator.share({ title, text });
+    } else if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(text);
+      alert('Text copy ho gaya. Ab ise apne preferred app me paste karke share kar sakte ho.');
+    } else {
+      prompt('Is text ko copy karke share karo:', text);
+    }
+  } catch (err) {
+    if (err && err.name !== 'AbortError') alert('Share open nahi ho paya.');
+  }
+}
+function shareApp() {
+  shareText('Trading Journal', 'Trading Journal app: ' + location.href);
+}
+function requestFeature() {
+  const message = prompt('Kaunsa feature chahiye?');
+  if (message && message.trim()) shareText('Feature request for Trading Journal', 'Feature request: ' + message.trim());
+}
+function reportBug() {
+  const message = prompt('Bug kya aa raha hai?');
+  if (message && message.trim()) shareText('Bug report for Trading Journal', 'Bug report: ' + message.trim());
 }
 
 function toggleDetail(el) { el.querySelector('.day-detail').style.display = el.querySelector('.day-detail').style.display === 'block' ? 'none' : 'block'; }
@@ -645,6 +773,7 @@ auth.onAuthStateChanged(u => {
     currentUser = u;
     lockUI(false);
     const ue = document.getElementById('userEmail'); if (ue) ue.innerText = 'login: ' + u.email;
+    const pe = document.getElementById('profileEmail'); if (pe) pe.innerText = u.email || 'Signed in';
     loadCloud();
   } else {
     currentUser = null;
