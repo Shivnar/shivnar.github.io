@@ -111,10 +111,12 @@ button.blue { background: linear-gradient(135deg, #388bfd, #1f6feb); }
     <div class="card">
       <h3>Data</h3>
       <button class="blue full" onclick="downloadCSV()">Download CSV</button>
+      <p class="sub" id="userEmail" style="margin:4px 0"></p>
       <button class="blue full" onclick="backupData()">Backup (file save karo)</button>
       <button class="blue full" onclick="document.getElementById('restoreFile').click()">Restore backup</button>
       <input type="file" id="restoreFile" accept=".json" style="display:none" onchange="restoreData(this)">
       <button class="danger full" onclick="wipeAll()">Delete all trades</button>
+      <button class="full" style="background:#b62324;margin-top:8px" onclick="doLogout()">Log out</button>
     </div>
     <div class="card"><p class="sub">Made with HTML, CSS &amp; JS. Data aapke phone me hi save hota hai.</p></div>
   </div>
@@ -395,6 +397,7 @@ function lockUI(show) {
   document.querySelector('.bottomnav').style.display = show ? 'none' : '';
 }
 function authMsg(t){ document.getElementById('authHint').innerText = t; }
+function doLogout() { auth.signOut(); }
 
 async function doSignup() {
   const e = document.getElementById('emailInput').value.trim(), p = document.getElementById('passInput').value;
@@ -413,6 +416,7 @@ auth.onAuthStateChanged(u => {
   if (u) {
     currentUser = u;
     lockUI(false);
+    const ue = document.getElementById('userEmail'); if (ue) ue.innerText = 'login: ' + u.email;
     loadCloud();
   } else {
     currentUser = null;
