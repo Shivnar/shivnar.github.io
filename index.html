@@ -68,9 +68,41 @@ button.blue { background: linear-gradient(135deg, #388bfd, #1f6feb); }
 .bottomnav .active { color: #3fb950; }
 
 /* popup form */
-.overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.75); backdrop-filter: blur(3px); z-index: 30; }
+.overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.75); backdrop-filter: blur(3px); z-index: 30; overflow-y: auto; }
 .overlay.open { display: flex; align-items: flex-end; justify-content: center; animation: fadein .2s ease; }
-.sheet { background: #161b22; border-radius: 20px 20px 0 0; padding: 22px; width: 100%; max-width: 500px; border-top: 1px solid rgba(139,148,158,.2); }
+.sheet { background: #161b22; border-radius: 20px 20px 0 0; padding: 22px; width: 100%; max-width: 500px; max-height: 92vh; overflow-y: auto; border-top: 1px solid rgba(139,148,158,.2); }
+.form-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; }
+.form-head h3 { font-size:20px; }
+.form-head .close-form { width:38px; height:38px; padding:0; margin:0; border-radius:50%; background:#21262d; font-size:20px; }
+.form-label { display:block; color:#c9d1d9; font-size:13px; font-weight:650; margin:14px 0 5px; }
+.choice-row { display:flex; gap:7px; }
+.choice { flex:1; width:auto; margin:0; padding:10px 6px; border:1px solid #30363d; background:#21262d; color:#c9d1d9; font-size:13px; white-space:nowrap; }
+.choice.active { background:#1f6feb; border-color:#388bfd; color:white; }
+.choice-row.market-choices { flex-wrap:wrap; }
+.choice-row.market-choices .choice { flex:1 1 calc(50% - 7px); }
+.direction-row { display:grid; grid-template-columns:1fr 1fr; gap:5px; padding:4px; border-radius:12px; background:#0d1117; }
+.direction-row .choice { border:0; }
+.direction-row .choice.active.short { background:#da3633; }
+.form-field { background:#21262d; border:1px solid #30363d; margin:0; }
+.field-pair { display:grid; grid-template-columns:1fr 1fr auto; gap:8px; align-items:end; }
+.field-pair input { min-width:0; }
+.sell-head { display:flex; align-items:center; justify-content:space-between; margin-top:12px; }
+.sell-head .form-label { margin:0; }
+.add-sell { width:auto; padding:6px 8px; margin:0; background:transparent; color:#58a6ff; }
+.sell-row { display:grid; grid-template-columns:1fr 1fr 38px; gap:8px; align-items:end; margin:7px 0; }
+.sell-row .form-label { font-size:11px; margin:0 0 3px; }
+.sell-row input { min-width:0; margin:0; }
+.remove-sell { width:36px; height:42px; padding:0; margin:0; border-radius:50%; background:rgba(248,81,73,.15); color:#f85149; font-size:21px; }
+.leverage-choices { flex-wrap:wrap; }
+.leverage-choices .choice { flex:1 1 14%; }
+.preview-box { display:flex; justify-content:space-between; padding:13px; margin-top:14px; border-radius:12px; background:#0d1117; color:#c9d1d9; font-size:13px; }
+.preview-box b { display:block; margin-top:4px; font-size:18px; color:#3fb950; }
+.photo-list { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; margin-top:8px; }
+.photo-preview { position:relative; }
+.photo-preview img { width:100%; height:86px; object-fit:cover; border-radius:9px; }
+.photo-preview button { position:absolute; right:2px; top:2px; width:24px; height:24px; margin:0; padding:0; border-radius:50%; background:#b62324; }
+.photo-empty { padding:16px; text-align:center; background:#0d1117; color:#8b949e; border:1px dashed #30363d; border-radius:10px; font-size:13px; }
+#saveBtn { margin-top:18px; }
 
 /* pin lock */
 .lockscreen { position: fixed; inset: 0; background: rgba(10,14,15,.98); z-index: 100; display: flex; align-items: center; justify-content: center; }
@@ -86,10 +118,11 @@ button.blue { background: linear-gradient(135deg, #388bfd, #1f6feb); }
 
   <!-- HOME TAB -->
   <div id="page-home" class="page active">
-    <div class="tabs">
-      <button class="tab active" onclick="setMarket('Forex', this)">Forex</button>
-      <button class="tab" onclick="setMarket('Stock/F&O', this)">Stock/F&O</button>
+      <div class="tabs">
+      <button class="tab" onclick="setMarket('Stock', this)">Stock</button>
       <button class="tab" onclick="setMarket('Crypto', this)">Crypto</button>
+      <button class="tab active" onclick="setMarket('Forex', this)">Forex</button>
+      <button class="tab" onclick="setMarket('Commodities', this)">Commodities</button>
     </div>
     <div id="dayList"></div>
   </div>
@@ -124,13 +157,55 @@ button.blue { background: linear-gradient(135deg, #388bfd, #1f6feb); }
   <!-- ADD TRADE FORM (popup) -->
   <div id="formOverlay" class="overlay">
     <div class="sheet">
-      <h3 id="formTitle">New Trade</h3>
-      <input type="date" id="date">
-      <input type="text" id="stock" placeholder="Stock / Pair">
-      <input type="number" id="qty" placeholder="Quantity">
-      <input type="number" id="buy" placeholder="Buy price" step="0.01">
-      <input type="number" id="sell" placeholder="Sell price" step="0.01">
-      <button class="full" onclick="addTrade()" id="saveBtn">Save</button>
+      <div class="form-head"><h3 id="formTitle">New Journal</h3><button type="button" class="close-form" aria-label="Close" onclick="closeForm()">×</button></div>
+      <label class="form-label">Market</label>
+      <div class="choice-row market-choices" id="formMarkets">
+        <button type="button" class="choice active" data-market="Stock" onclick="selectFormMarket('Stock')">Stock</button>
+        <button type="button" class="choice" data-market="Crypto" onclick="selectFormMarket('Crypto')">Crypto</button>
+        <button type="button" class="choice" data-market="Forex" onclick="selectFormMarket('Forex')">Forex</button>
+        <button type="button" class="choice" data-market="Commodities" onclick="selectFormMarket('Commodities')">Commodities</button>
+      </div>
+      <label class="form-label">Instrument Type</label>
+      <div class="choice-row" id="instrumentChoices">
+        <button type="button" class="choice active" data-value="Spot" onclick="selectInstrument('Spot')">Spot</button>
+        <button type="button" class="choice" data-value="F&O" onclick="selectInstrument('F&O')">F&amp;O</button>
+      </div>
+      <label class="form-label">Direction</label>
+      <div class="direction-row" id="directionChoices">
+        <button type="button" class="choice active" data-value="Long" onclick="selectDirection('Long')">↗ Long</button>
+        <button type="button" class="choice short" data-value="Short" onclick="selectDirection('Short')">↘ Short</button>
+      </div>
+      <label class="form-label" for="date">Entry Date &amp; Time</label>
+      <input type="datetime-local" id="date" class="form-field" oninput="updatePreview()">
+      <label class="form-label" for="exitDateTime">Exit Date &amp; Time</label>
+      <input type="datetime-local" id="exitDateTime" class="form-field" oninput="updatePreview()">
+      <label class="form-label" for="stock">Underlying</label>
+      <input type="search" id="stock" class="form-field" list="underlyingOptions" placeholder="Stock / Pair / Coin name (e.g. AAPL, BTC/USD)">
+      <datalist id="underlyingOptions"><option value="AAPL"><option value="BTC/USD"><option value="EUR/USD"><option value="Gold"></datalist>
+      <div class="sell-head"><label class="form-label">Buys</label><button type="button" class="add-sell" onclick="addBuyRow()">+ Add Buy</button></div>
+      <div id="buyRows"></div>
+      <div class="sell-head"><label class="form-label">Sells</label><button type="button" class="add-sell" onclick="addSellRow()">+ Add Sell</button></div>
+      <div id="sellRows"></div>
+      <label class="form-label">Leverage (margin reference)</label>
+      <div class="choice-row leverage-choices" id="leverageChoices">
+        <button type="button" class="choice active" data-value="1" onclick="selectLeverage(1)">1x</button><button type="button" class="choice" data-value="2" onclick="selectLeverage(2)">2x</button><button type="button" class="choice" data-value="5" onclick="selectLeverage(5)">5x</button><button type="button" class="choice" data-value="10" onclick="selectLeverage(10)">10x</button><button type="button" class="choice" data-value="25" onclick="selectLeverage(25)">25x</button><button type="button" class="choice" data-value="50" onclick="selectLeverage(50)">50x</button>
+      </div>
+      <label class="form-label" for="brokerage">Brokerage / Fees (optional)</label>
+      <input type="number" id="brokerage" class="form-field" min="0" step="0.01" placeholder="0.00" oninput="updatePreview()">
+      <label class="form-label" for="strategy">Strategy</label>
+      <select id="strategy" class="form-field"><option value="">Select strategy</option><option>Breakout</option><option>Reversal</option><option>Trend following</option><option>Scalping</option><option>Options strategy</option><option>Other</option></select>
+      <label class="form-label" for="entryCondition">Entry Condition</label>
+      <input type="text" id="entryCondition" class="form-field" placeholder="Signal or reason for entry">
+      <label class="form-label" for="exitCondition">Exit Condition</label>
+      <select id="exitCondition" class="form-field"><option value="">Select exit condition</option><option>Target reached</option><option>Stop loss</option><option>Signal reversal</option><option>Time-based exit</option><option>Manual exit</option><option>Other</option></select>
+      <label class="form-label" for="learning">Learning &amp; Mistakes</label>
+      <textarea id="learning" class="form-field" rows="4" placeholder="Why are you taking this trade? How are you feeling?"></textarea>
+      <label class="form-label">Images (up to 3, max 3MB each)</label>
+      <input type="file" id="tradeImages" accept="image/*" multiple style="display:none" onchange="handleTradeImages(this)">
+      <button type="button" class="plain full" onclick="$('tradeImages').click()">+ Add Photo</button>
+      <div id="photoList" class="photo-list"><div class="photo-empty">No photos added</div></div>
+      <div class="preview-box"><span>Total quantity <b id="totalQty">0</b></span><span>NET P&amp;L <b id="netPnl">0.00</b></span></div>
+      <button class="full blue" onclick="addTrade()" id="saveBtn">Save Journal</button>
       <button class="full plain" onclick="closeForm()">Cancel</button>
     </div>
   </div>
@@ -194,22 +269,152 @@ function save() {
   if (currentUser && !syncing) { for (const t of trades) pushTrade(t); }
 }
 
-function openForm() { $('formOverlay').classList.add('open'); }
+function openForm() {
+  $('formOverlay').classList.add('open');
+  if (!$('date').value) $('date').value = localDateTimeValue();
+  if (!$('buyRows').children.length) addBuyRow();
+  if (!$('sellRows').children.length) addSellRow();
+  renderPhotoList();
+  updatePreview();
+}
+function localDateTimeValue() {
+  const d = new Date();
+  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+  return d.toISOString().slice(0, 16);
+}
+let formMarket = 'Stock', instrumentType = 'Spot', direction = 'Long', leverage = 1, tradeImagesData = [];
+function selectFormMarket(value) {
+  formMarket = value;
+  document.querySelectorAll('#formMarkets .choice').forEach(b => b.classList.toggle('active', b.dataset.market === value));
+}
+function selectInstrument(value) {
+  instrumentType = value;
+  document.querySelectorAll('#instrumentChoices .choice').forEach(b => b.classList.toggle('active', b.dataset.value === value));
+}
+function selectDirection(value) {
+  direction = value;
+  document.querySelectorAll('#directionChoices .choice').forEach(b => b.classList.toggle('active', b.dataset.value === value));
+  updatePreview();
+}
+function selectLeverage(value) {
+  leverage = value;
+  document.querySelectorAll('#leverageChoices .choice').forEach(b => b.classList.toggle('active', Number(b.dataset.value) === value));
+  updatePreview();
+}
+function addBuyRow(price = '', quantity = '') {
+  const row = document.createElement('div');
+  row.className = 'sell-row';
+  row.innerHTML = '<div><label class="form-label">Buy Price</label><input class="buy-price" type="number" min="0" step="0.01" placeholder="0.00" value="' + price + '" oninput="updatePreview()"></div>' +
+    '<div><label class="form-label">Qty</label><input class="buy-qty" type="number" min="0" step="any" placeholder="0" value="' + quantity + '" oninput="updatePreview()"></div>' +
+    '<button type="button" class="remove-sell" aria-label="Remove buy" onclick="this.parentElement.remove();updatePreview()">−</button>';
+  $('buyRows').appendChild(row);
+  updatePreview();
+}
+function collectRows(containerId, priceClass, qtyClass) {
+  return Array.from(document.querySelectorAll('#' + containerId + ' .sell-row')).map(row => ({
+    price: Number(row.querySelector('.' + priceClass).value), quantity: Number(row.querySelector('.' + qtyClass).value)
+  }));
+}
+function calculateTrade() {
+  const buys = collectRows('buyRows', 'buy-price', 'buy-qty');
+  const sells = collectRows('sellRows', 'sell-price', 'sell-qty');
+  const buyQty = buys.reduce((sum, b) => sum + (b.quantity || 0), 0);
+  const sellQty = sells.reduce((sum, s) => sum + (s.quantity || 0), 0);
+  const buyValue = buys.reduce((sum, b) => sum + (b.price || 0) * (b.quantity || 0), 0);
+  const sellValue = sells.reduce((sum, s) => sum + (s.price || 0) * (s.quantity || 0), 0);
+  const entryQty = direction === 'Long' ? buyQty : sellQty;
+  const exitQty = direction === 'Long' ? sellQty : buyQty;
+  const avgBuy = buyQty ? buyValue / buyQty : 0;
+  const avgSell = sellQty ? sellValue / sellQty : 0;
+  const matchedQty = Math.min(entryQty, exitQty);
+  const gross = (avgSell - avgBuy) * matchedQty;
+  const fees = Math.max(0, Number($('brokerage').value) || 0);
+  const net = gross - fees;
+  return { buys, sells, buyQty, sellQty, entryQty, exitQty, buyValue, sellValue, avgBuy, avgSell, matchedQty, gross, fees, net };
+}
+function updatePreview() {
+  if (!$('totalQty') || !$('netPnl')) return;
+  const calc = calculateTrade();
+  $('totalQty').innerText = calc.entryQty + ' entry / ' + calc.exitQty + ' exit';
+  $('netPnl').innerText = calc.net.toFixed(2);
+  $('netPnl').style.color = calc.net >= 0 ? '#3fb950' : '#f85149';
+}
+function handleTradeImages(input) {
+  const files = Array.from(input.files || []);
+  if (files.length + tradeImagesData.length > 3) { alert('max 3 photos add kar sakte ho'); input.value = ''; return; }
+  const maxSize = 3 * 1024 * 1024;
+  const invalid = files.find(f => !f.type.startsWith('image/') || f.size > maxSize);
+  if (invalid) { alert('sirf image files, max 3MB each'); input.value = ''; return; }
+  Promise.all(files.map(file => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const image = new Image();
+      image.onload = () => {
+        const canvas = document.createElement('canvas');
+        const scale = Math.min(1, 1280 / Math.max(image.width, image.height));
+        canvas.width = Math.round(image.width * scale); canvas.height = Math.round(image.height * scale);
+        canvas.getContext('2d').drawImage(image, 0, 0, canvas.width, canvas.height);
+        let quality = 0.72, data = canvas.toDataURL('image/jpeg', quality);
+        while (data.length > 200000 && quality > 0.3) { quality -= 0.1; data = canvas.toDataURL('image/jpeg', quality); }
+        if (data.length > 200000) { reject(new Error('image too large after optimization')); return; }
+        resolve({ name: file.name, data });
+      };
+      image.onerror = reject;
+      image.src = reader.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  }))).then(items => { tradeImagesData = tradeImagesData.concat(items); renderPhotoList(); input.value = ''; }).catch(() => alert('photo optimize nahi ho paya, smaller photo try karo'));
+}
+function renderPhotoList() {
+  const list = $('photoList');
+  if (!tradeImagesData.length) { list.innerHTML = '<div class="photo-empty">No photos added</div>'; return; }
+  list.innerHTML = tradeImagesData.map((photo, i) => '<div class="photo-preview"><img src="' + photo.data + '" alt="Trade photo"><button type="button" aria-label="Remove photo" onclick="tradeImagesData.splice(' + i + ',1);renderPhotoList()">×</button></div>').join('');
+}
+function addSellRow(price = '', quantity = '') {
+  const row = document.createElement('div');
+  row.className = 'sell-row';
+  row.innerHTML = '<div><label class="form-label">Sell Price</label><input class="sell-price" type="number" min="0" step="0.01" placeholder="0.00" value="' + price + '" oninput="updatePreview()"></div>' +
+    '<div><label class="form-label">Qty</label><input class="sell-qty" type="number" min="0" step="any" placeholder="0" value="' + quantity + '" oninput="updatePreview()"></div>' +
+    '<button type="button" class="remove-sell" aria-label="Remove sell" onclick="this.parentElement.remove();updatePreview()">−</button>';
+  $('sellRows').appendChild(row);
+  updatePreview();
+}
 function closeForm() {
   $('formOverlay').classList.remove('open');
-  ['date','stock','qty','buy','sell'].forEach(i => $(i).value = '');
+  $('date').value = '';
+  $('exitDateTime').value = '';
+  $('stock').value = '';
+  $('buyRows').innerHTML = '';
+  $('sellRows').innerHTML = '';
+  $('brokerage').value = '';
+  $('strategy').value = '';
+  $('entryCondition').value = '';
+  $('exitCondition').value = '';
+  $('learning').value = '';
+  tradeImagesData = [];
+  renderPhotoList();
+  leverage = 1; selectLeverage(leverage);
+  formMarket = 'Stock'; instrumentType = 'Spot'; direction = 'Long';
+  selectFormMarket(formMarket); selectInstrument(instrumentType); selectDirection(direction);
   editIndex = null;
-  $('formTitle').innerText = 'New Trade';
-  $('saveBtn').innerText = 'Save';
+  $('formTitle').innerText = 'New Journal';
+  $('saveBtn').innerText = 'Save Journal';
 }
 
 function addTrade() {
-  const date = $('date').value, stock = $('stock').value.trim();
-  const qty = Number($('qty').value), buy = Number($('buy').value), sell = Number($('sell').value);
-  if (!date || !stock || !qty || !buy || !sell) { alert('saare box bharo'); return; }
-  const t = { date, stock, qty, buy, sell, profit: (sell - buy) * qty, market };
+  const entryDateTime = $('date').value, exitDateTime = $('exitDateTime').value, stock = $('stock').value.trim();
+  const calc = calculateTrade();
+  if (!entryDateTime || !stock || !calc.entryQty || !calc.exitQty || calc.entryQty < calc.exitQty || calc.buys.some(b => !b.price || !b.quantity) || calc.sells.some(s => !s.price || !s.quantity)) {
+    alert('entry date-time, underlying, valid buy/sell price aur qty bharo; exit qty entry qty se zyada nahi ho sakti'); return;
+  }
+  const qty = calc.exitQty;
+  const buy = calc.avgBuy, sell = calc.avgSell, profit = calc.net;
+  const date = entryDateTime.slice(0, 10);
+  const t = { id: 'trade_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8), date, entryDateTime, exitDateTime, stock, qty, buy, sell, profit, grossProfit: calc.gross, brokerage: calc.fees, market: formMarket, instrumentType, direction, leverage, buys: calc.buys, sells: calc.sells, entryCondition: $('entryCondition').value.trim(), exitCondition: $('exitCondition').value, strategy: $('strategy').value, learning: $('learning').value.trim(), photos: tradeImagesData.slice() };
   if (editIndex === null) trades.push(t);
-  else { trades[editIndex] = t; }
+  else trades[editIndex] = t;
+  market = formMarket;
   save();
   closeForm();
   render();
@@ -219,7 +424,7 @@ function deleteTrade(i) {
   if (!confirm('delete?')) return;
   const t = trades[i];
   if (currentUser && t) {
-    const id = t.date + '_' + t.stock + '_' + t.buy + '_' + t.sell + '_' + t.qty;
+    const id = t.id || (t.date + '_' + t.stock + '_' + t.buy + '_' + t.sell + '_' + t.qty);
     removeTrade(id);
   }
   trades.splice(i, 1);
@@ -227,10 +432,15 @@ function deleteTrade(i) {
   render();
 }
 
+function marketMatches(t, selected) {
+  if (t.market === selected) return true;
+  return selected === 'Stock' && t.market === 'Stock/F&O';
+}
 function setMarket(m, btn) {
   market = m;
-  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('#page-home .tab').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
+  document.querySelectorAll('#page-home .tab').forEach(b => b.classList.toggle('active', b.textContent.trim() === m));
   render();
 }
 
@@ -245,10 +455,28 @@ function go(page, btn) {
 
 function toggleDetail(el) { el.querySelector('.day-detail').style.display = el.querySelector('.day-detail').style.display === 'block' ? 'none' : 'block'; }
 
+function escapeHtml(value) {
+  return String(value == null ? '' : value).replace(/[&<>"']/g, ch => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[ch]));
+}
+function tradeMeta(t) {
+  const parts = [];
+  if (t.direction || t.instrumentType) parts.push([t.direction, t.instrumentType].filter(Boolean).join(' · '));
+  if (t.entryDateTime) parts.push('entry ' + escapeHtml(t.entryDateTime.replace('T', ' ')));
+  if (t.exitDateTime) parts.push('exit ' + escapeHtml(t.exitDateTime.replace('T', ' ')));
+  if (t.strategy) parts.push('strategy ' + escapeHtml(t.strategy));
+  if (t.leverage) parts.push(escapeHtml(t.leverage) + 'x');
+  if (Array.isArray(t.buys) && t.buys.length) parts.push('buys ' + t.buys.map(b => escapeHtml(b.quantity) + ' × ' + escapeHtml(b.price)).join(', '));
+  if (Array.isArray(t.sells) && t.sells.length) parts.push('sells ' + t.sells.map(s => escapeHtml(s.quantity) + ' × ' + escapeHtml(s.price)).join(', '));
+  if (t.brokerage) parts.push('fees ' + escapeHtml(t.brokerage));
+  if (t.entryCondition) parts.push('entry: ' + escapeHtml(t.entryCondition));
+  if (t.exitCondition) parts.push('exit: ' + escapeHtml(t.exitCondition));
+  if (t.learning) parts.push(escapeHtml(t.learning));
+  return parts.length ? '<div class="dow">' + parts.join(' · ') + '</div>' : '';
+}
 function renderJournal() {
   const list = $('journalList');
   list.innerHTML = '';
-  const visible = trades.map((t, i) => ({ t, i })).filter(({ t }) => t.market === market).reverse();
+  const visible = trades.map((t, i) => ({ t, i })).filter(({ t }) => marketMatches(t, market)).reverse();
   if (!visible.length) {
     list.innerHTML = '<div class="card sub">Koi trade nahi. + button se add karo</div>';
     return;
@@ -257,7 +485,7 @@ function renderJournal() {
     const row = document.createElement('div');
     row.className = 'trade-row';
     row.innerHTML =
-      '<div>' + t.stock + ' <span style="color:#8b949e">x' + t.qty + '</span><div class="dow">' + t.date + '</div></div>' +
+      '<div>' + escapeHtml(t.stock) + ' <span style="color:#8b949e">x' + escapeHtml(t.qty) + '</span><div class="dow">' + escapeHtml(t.date) + '</div>' + tradeMeta(t) + '</div>' +
       '<div style="display:flex;align-items:center;gap:10px">' +
       '<b class="' + (t.profit >= 0 ? 'profit' : 'loss2') + '">' + (t.profit >= 0 ? '$' : '$-') + Math.abs(t.profit).toFixed(2) + '</b>' +
       '<span class="del" onclick="deleteTrade(' + i + ')" style="color:#f85149;font-weight:700;cursor:pointer">X</span></div>';
@@ -269,7 +497,7 @@ function render() {
   const list = $('dayList');
   list.innerHTML = '';
   // sirf is market ke trades
-  const visible = trades.map((t, i) => ({ t, i })).filter(({ t }) => t.market === market);
+  const visible = trades.map((t, i) => ({ t, i })).filter(({ t }) => marketMatches(t, market));
 
   // date ke hisaab se group karo
   const groups = {};
@@ -296,7 +524,7 @@ function render() {
     dayTrades.forEach(({ t, i }) => {
       const row = document.createElement('div');
       row.className = 'trade-row';
-      row.innerHTML = '<span>' + t.stock + ' x' + t.qty + ' <button style="width:auto;padding:3px 8px;background:#b62324" onclick="event.stopPropagation();deleteTrade(' + i + ')">X</button></span>' +
+      row.innerHTML = '<span>' + escapeHtml(t.stock) + ' x' + escapeHtml(t.qty) + ' <button style="width:auto;padding:3px 8px;background:#b62324" onclick="event.stopPropagation();deleteTrade(' + i + ')">X</button>' + tradeMeta(t) + '</span>' +
         '<span class="' + (t.profit >= 0 ? 'profit' : 'loss2') + '">' + t.profit.toFixed(2) + '</span>';
       detail.appendChild(row);
     });
@@ -439,7 +667,7 @@ async function loadCloud() {
 }
 async function pushTrade(t) {
   if (!currentUser) return;
-  const id = t.date + '_' + t.stock + '_' + t.buy + '_' + t.sell + '_' + t.qty;
+  const id = t.id || (t.date + '_' + t.stock + '_' + t.buy + '_' + t.sell + '_' + t.qty);
   await db.collection('users').doc(currentUser.uid).collection('trades').doc(id).set(t);
 }
 async function removeTrade(id) {
