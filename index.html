@@ -78,6 +78,9 @@ button.blue { background: linear-gradient(135deg, #388bfd, #1f6feb); }
 .lockbox h3 { margin-bottom: 14px; }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
@@ -130,13 +133,15 @@ button.blue { background: linear-gradient(135deg, #388bfd, #1f6feb); }
     </div>
   </div>
 
-  <!-- PIN LOCK -->
+  <!-- LOGIN -->
   <div id="lockScreen" class="lockscreen" style="display:none">
     <div class="lockbox">
-      <h3 id="lockTitle">PIN lagao</h3>
-      <input type="tel" id="pinInput" maxlength="4" inputmode="numeric" placeholder="4 digit PIN" style="text-align:center;font-size:22px;letter-spacing:8px">
-      <button class="full" onclick="savePin()" id="pinBtn">Save</button>
-      <p class="sub" id="pinHint">ye PIN yaad rakhna, har baar khulte waqt lagega</p>
+      <h3 id="lockTitle">Trading Journal</h3>
+      <input type="email" id="emailInput" placeholder="Email" style="text-align:center;font-size:16px">
+      <input type="password" id="passInput" placeholder="Password (6+ chars)" style="text-align:center;font-size:16px">
+      <button class="full" onclick="doLogin()" id="loginBtn">Login</button>
+      <button class="full plain" onclick="doSignup()" id="signupBtn">Naya account banao</button>
+      <p class="sub" id="authHint">email aur password se login, sab devices pe same data</p>
     </div>
   </div>
 
@@ -182,7 +187,10 @@ let market = 'Forex', chart = null, stockChart = null, editIndex = null;
 const $ = id => document.getElementById(id);
 const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 
-function save() { localStorage.setItem('trades', JSON.stringify(trades)); }
+function save() {
+  localStorage.setItem('trades', JSON.stringify(trades));
+  if (currentUser && !syncing) { for (const t of trades) pushTrade(t); }
+}
 
 function openForm() { $('formOverlay').classList.add('open'); }
 function closeForm() {
@@ -207,6 +215,11 @@ function addTrade() {
 
 function deleteTrade(i) {
   if (!confirm('delete?')) return;
+  const t = trades[i];
+  if (currentUser && t) {
+    const id = t.date + '_' + t.stock + '_' + t.buy + '_' + t.sell + '_' + t.qty;
+    removeTrade(id);
+  }
   trades.splice(i, 1);
   save();
   render();
@@ -372,32 +385,64 @@ function restoreData(input) {
   };
   reader.readAsText(file);
 }
-initLock();
-function savePin() {
-  const v = document.getElementById('pinInput').value.trim();
-  const setMode = !localStorage.getItem('pin');
-  if (!/^\d{4}$/.test(v)) { alert('4 digit number dalo (jaise 1234)'); return; }
-  if (setMode) { localStorage.setItem('pin', v); unlockApp(); return; }
-  if (v === localStorage.getItem('pin')) unlockApp();
-  else { alert('galat PIN'); document.getElementById('pinInput').value = ''; }
+firebase.initializeApp({apiKey:"AIzaSyD26k-RLaNnkwM9OClI8xUvm_36H7eQ8LE",authDomain:"trading-journal-b3556.firebaseapp.com",projectId:"trading-journal-b3556",storageBucket:"trading-journal-b3556.firebasestorage.app",messagingSenderId:"928037935465",appId:"1:928037935465:web:cbaefbcd04a94bb6fa85f8"});
+const auth = firebase.auth(), db = firebase.firestore();
+let currentUser = null, syncing = false;
+
+function lockUI(show) {
+  document.getElementById('lockScreen').style.display = show ? 'flex' : 'none';
+  document.getElementById('fab').style.display = show ? 'none' : '';
+  document.querySelector('.bottomnav').style.display = show ? 'none' : '';
 }
-function unlockApp() {
-  document.getElementById('lockScreen').style.display = 'none';
-  document.getElementById('fab').style.display = '';
-  document.querySelector('.bottomnav').style.display = '';
+function authMsg(t){ document.getElementById('authHint').innerText = t; }
+
+async function doSignup() {
+  const e = document.getElementById('emailInput').value.trim(), p = document.getElementById('passInput').value;
+  if (!e || p.length < 6) { authMsg('email dalo aur password 6+ letters ka'); return; }
+  try { await auth.createUserWithEmailAndPassword(e, p); }
+  catch(err) { authMsg(err.code=='auth/email-already-in-use' ? 'ye email pehle se hai, login karo' : 'error: ' + err.message); }
 }
-function initLock() {
-  const hasPin = !!localStorage.getItem('pin');
-  const lock = document.getElementById('lockScreen');
-  document.getElementById('fab').style.display = 'none';
-  document.querySelector('.bottomnav').style.display = 'none';
-  lock.style.display = 'flex';
-  if (hasPin) {
-    document.getElementById('lockTitle').innerText = 'PIN dalo';
-    document.getElementById('pinBtn').innerText = 'Unlock';
-    document.getElementById('pinHint').innerText = '';
+async function doLogin() {
+  const e = document.getElementById('emailInput').value.trim(), p = document.getElementById('passInput').value;
+  if (!e || !p) { authMsg('email aur password dono dalo'); return; }
+  try { await auth.signInWithEmailAndPassword(e, p); }
+  catch(err) { authMsg(err.code=='auth/invalid-credential' ? 'galat email ya password' : 'error: ' + err.message); }
+}
+
+auth.onAuthStateChanged(u => {
+  if (u) {
+    currentUser = u;
+    lockUI(false);
+    loadCloud();
+  } else {
+    currentUser = null;
+    lockUI(true);
+    authMsg('');
   }
+});
+
+async function loadCloud() {
+  if (!currentUser) return;
+  syncing = true;
+  try {
+    const snap = await db.collection('users').doc(currentUser.uid).collection('trades').get();
+    const cloud = snap.docs.map(d => d.data());
+    if (cloud.length) { trades = cloud.filter(t => t && t.date); localStorage.setItem('trades', JSON.stringify(trades)); }
+    else if (trades.length) { for (const t of trades) await pushTrade(t); }
+    render();
+  } catch(e) { console.warn(e); }
+  syncing = false;
 }
+async function pushTrade(t) {
+  if (!currentUser) return;
+  const id = t.date + '_' + t.stock + '_' + t.buy + '_' + t.sell + '_' + t.qty;
+  await db.collection('users').doc(currentUser.uid).collection('trades').doc(id).set(t);
+}
+async function removeTrade(id) {
+  if (!currentUser) return;
+  await db.collection('users').doc(currentUser.uid).collection('trades').doc(id).delete();
+}
+
 </script>
 <div style="text-align:center;padding:16px;color:#888;font-size:12px">made by Satya</div>
 </body>
